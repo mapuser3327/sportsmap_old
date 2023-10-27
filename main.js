@@ -52,16 +52,35 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer",
 				  }
 				});
 
-				 const template = new PopupTemplate ({
-						title: "{Name} : {Team} {Position}",
-						 content: "{EventType} : {EventYear}"
-				 });
+				 const template = new PopupTemplate ({		
+					title:'<img width="120" height="60" src="{TeamPhoto}" alt="{feature.attributes.name}"> {Name} : {Team} {Position}',				 
+					   // content: "{EventType} : {EventYear}",
+						content: `<div>
+      <p>
+         
+		<li>{EventType} : {EventYear}
+	  </p>
+	  <p>
+		<li>  {Team} : {Position}
+	  </p>
+    </div>
+  `,
+   fieldInfos: [
+                
+				],
+  mediaInfos: [
+    {
+      type: 'image',
+      url: '{feature.attributes.imageUrl}',
+    },
+  ],
+								 });
 				
 				      const eventRenderer = new UniqueValueRenderer({
 							field: 'EventType',
 					});
 					
-			const addPlayerType = function (type, iconName, renderer) {
+			   const addPlayerType = function (type, iconName, renderer) {
 					  renderer.addUniqueValueInfo({
 						value: type,
 						symbol: new WebStyleSymbol({
