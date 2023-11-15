@@ -4,6 +4,7 @@ require([
   'esri/layers/FeatureLayer',
   'esri/symbols/WebStyleSymbol',
   'esri/renderers/UniqueValueRenderer',
+  'esri/renderers/SimpleRenderer',
   'esri/widgets/Legend',
   'esri/widgets/BasemapGallery',
   'esri/widgets/Home',
@@ -13,12 +14,14 @@ require([
   'esri/PopupTemplate',
   'esri/layers/support/LabelClass',
   'esri/symbols/TextSymbol',
+  'esri/symbols/PictureMarkerSymbol',
 ], (
   Map,
   MapView,
   FeatureLayer,
   WebStyleSymbol,
   UniqueValueRenderer,
+  SimpleRenderer,
   Legend,
   BasemapGallery,
   Home,
@@ -27,7 +30,8 @@ require([
   LayerList,
   PopupTemplate,
   LabelClass,
-  TextSymbol
+  TextSymbol,
+  PictureMarkerSymbol
 ) => {
   //const server = 'http://127.0.0.1:5500/';
   const server = location.origin + '/';
@@ -57,21 +61,22 @@ require([
 
   const labelClass = new LabelClass({
     symbol: new TextSymbol({
-      color: 'green',
-      backgroundColor: [255, 255, 255, 0.75],
-      borderLineColor: 'green',
-      borderLineSize: 0.5,
-      yoffset: 2,
+      color: 'darkgreen',
+      //backgroundColor: [255, 255, 255, 0.75],
+      // borderLineColor: 'green',
+      // borderLineSize: 0.5,
+      yoffset: 1,
       font: {
         // autocast as new Font()
         family: 'Playfair Display',
-        size: 6,
-        //  weight: "bold"
+        size: 7,
+        weight: 'bold',
+        textshadow: '2px 2px #ff0000',
       },
     }),
     labelPlacement: 'above-right',
     labelExpressionInfo: {
-      expression: '$feature.NAME',
+      expression: `$feature.TEAM`,
     },
   });
 
@@ -138,6 +143,31 @@ require([
   const eventRenderer = new UniqueValueRenderer({
     field: 'EventType',
   });
+  const stadiumRenderer = new SimpleRenderer({
+    symbol: new PictureMarkerSymbol({
+      url: 'eagles.png',
+      width: '40px',
+      height: '40px',
+    }),
+  });
+
+  //   const addClass = function (val, renderer) {
+  //     var lbl, sym;
+  //     lbl = 'Yes';
+  //     sym = new PictureMarkerSymbol({
+  //       url: 'eagles.png',
+  //       width: '75px',
+  //       height: '75px',
+  //     });
+
+  //     renderer.addUniqueValueInfo({
+  //       value: val,
+  //       symbol: sym,
+  //       label: lbl,
+  //     });
+  //   };
+
+  //   addClass('eagles', stadiumRenderer);
 
   const addPlayerType = function (type, iconName, renderer) {
     renderer.addUniqueValueInfo({
@@ -200,8 +230,9 @@ require([
     latitudeField: 'LATITUDE',
     longitudeField: 'LONGITUDE',
     popupTemplate: stadiumTemplate,
-    // renderer: eventRenderer,
-    // labelingInfo: [labelClass]
+
+    renderer: stadiumRenderer,
+    labelingInfo: [labelClass],
   });
   map.add(stadiums);
 
@@ -214,10 +245,21 @@ require([
       },
     ],
   });
+
+  const LayerListWidgetExpand = new Expand({
+    view: view,
+    content: new LayerList({
+      view: view,
+    }),
+    group: 'bottom-right',
+    expanded: false,
+  });
+  view.ui.add([LayerListWidgetExpand], 'bottom-right');
   const lgExpand = new Expand({
     view,
     content: legend,
-    expandIcon: 'lgend',
+    expandIcon: 'legend',
+    group: 'top-right',
   });
-  view.ui.add(lgExpand, 'bottom-right');
+  view.ui.add(lgExpand, 'top-right');
 });
