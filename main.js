@@ -33,11 +33,29 @@ require([
   TextSymbol,
   PictureMarkerSymbol
 ) => {
-  //const server = 'http://127.0.0.1:5500/';
+  const eaglesFile = 'eagles.json';
+
+  let eaglesPlayers;
   const server = location.origin + '/';
   const map = new Map({
     basemap: 'streets-vector',
   });
+
+  const positions = new Set();
+  const players = new Map();
+
+  fetch(eaglesFile)
+    .then((r) => r.json())
+    .then((json) => {
+      eaglesPlayers = json.features;
+
+      eaglesPlayers.forEach((p) => {
+        positions.add(p.properties.position);
+        players.set(p.properties.player, p.properties);
+      });
+      //console.log(positions);
+      //console.log(players);
+    });
 
   const view = new MapView({
     container: viewDiv,
@@ -79,6 +97,20 @@ require([
       expression: `$feature.TEAM`,
     },
   });
+
+  const buildTeamList = function (graphics) {
+    let fragment = document.getElementById('team-selection');
+    // Loops through all graphics and builds the list items (which are selectable buttons)
+    graphics.forEach(function (stadium, index) {
+      let attributes = stadium.attributes;
+      let li = document.createElement('option');
+      li.value = attributes.team_short_name;
+      li.textContent = attributes.team;
+      fragment.appendChild(li);
+    });
+    // listNode.innerHTML = "";
+    // listNode.appendChild(fragment);
+  };
 
   function buildTitle(feature) {
     //console.log(feature.graphic.attributes);
@@ -143,31 +175,24 @@ require([
   const eventRenderer = new UniqueValueRenderer({
     field: 'EventType',
   });
-  const stadiumRenderer = new SimpleRenderer({
-    symbol: new PictureMarkerSymbol({
-      url: 'eagles.png',
-      width: '40px',
-      height: '40px',
-    }),
+  const stadiumRenderer = new UniqueValueRenderer({
+    field: 'team_short_name',
   });
 
-  //   const addClass = function (val, renderer) {
-  //     var lbl, sym;
-  //     lbl = 'Yes';
-  //     sym = new PictureMarkerSymbol({
-  //       url: 'eagles.png',
-  //       width: '75px',
-  //       height: '75px',
-  //     });
+  const addClass = function (val, renderer) {
+    const url = 'teamIcons/' + val + '.png';
+    const sym = new PictureMarkerSymbol({
+      url: url,
+      width: '35px',
+      height: '35px',
+    });
 
-  //     renderer.addUniqueValueInfo({
-  //       value: val,
-  //       symbol: sym,
-  //       label: lbl,
-  //     });
-  //   };
-
-  //   addClass('eagles', stadiumRenderer);
+    renderer.addUniqueValueInfo({
+      value: val,
+      symbol: sym,
+      label: val,
+    });
+  };
 
   const addPlayerType = function (type, iconName, renderer) {
     renderer.addUniqueValueInfo({
@@ -232,9 +257,18 @@ require([
     popupTemplate: stadiumTemplate,
 
     renderer: stadiumRenderer,
-    labelingInfo: [labelClass],
+    // labelingInfo: [labelClass],
   });
   map.add(stadiums);
+
+  stadiums.when(() => {
+    stadiums.queryFeatures().then((results) => {
+      results.features.forEach((f) => {
+        addClass(f.attributes['team_short_name'], stadiumRenderer);
+      });
+      buildTeamList(results.features);
+    });
+  });
 
   const legend = new Legend({
     view: view,
