@@ -150,6 +150,39 @@ require([
     content: buildContent,
     outFields: ['*'],
   });
+  // "conference": "Eastern",
+  // "division": "Atlantic",
+  // "team": "76ers",
+  // "city": "Philadelphia",
+  // "arena": "Wells Fargo Center",
+  const arenaTemplate = new PopupTemplate({
+    title: '{city } {team}',
+    outFields: ['*'],
+
+    content: [
+      {
+        // It is also possible to set the fieldInfos outside of the content
+        // directly in the popupTemplate. If no fieldInfos is specifically set
+        // in the content, it defaults to whatever may be set within the popupTemplate.
+        type: 'fields',
+        fieldInfos: [
+          {
+            fieldName: 'arena',
+            label: 'Arena Name',
+          },
+          {
+            fieldName: 'conference',
+            label: 'Conference',
+          },
+          {
+            fieldName: 'division',
+            label: 'Division',
+          },
+        ],
+      },
+    ],
+  });
+
   const stadiumTemplate = new PopupTemplate({
     title: buildTeamTitle,
     outFields: ['*'],
@@ -188,9 +221,27 @@ require([
   const stadiumRenderer = new UniqueValueRenderer({
     field: 'team_short_name',
   });
+  const arenaRenderer = new UniqueValueRenderer({
+    field: 'team',
+  });
 
   const addClass = function (val, renderer) {
     const url = 'teamIcons/' + val + '.png';
+    const sym = new PictureMarkerSymbol({
+      url: url,
+      width: '35px',
+      height: '35px',
+    });
+
+    renderer.addUniqueValueInfo({
+      value: val,
+      symbol: sym,
+      label: val,
+    });
+  };
+
+  const addArenaClass = function (val, renderer) {
+    const url = 'nba/' + val.toLowerCase() + '.png';
     const sym = new PictureMarkerSymbol({
       url: url,
       width: '35px',
@@ -227,6 +278,7 @@ require([
     longitudeField: 'Long',
     popupTemplate: template,
     renderer: eventRenderer,
+    visible: false,
     // labelingInfo: [labelClass]
   });
   map.add(playerlayer);
@@ -276,7 +328,28 @@ require([
       results.features.forEach((f) => {
         addClass(f.attributes['team_short_name'], stadiumRenderer);
       });
-      buildTeamList(results.features);
+      // buildTeamList(results.features);
+    });
+  });
+  const arenaUrl = 'Arenas.geojson';
+  const arenas = new GeoJSONLayer({
+    title: 'NBA Arenas',
+    url: arenaUrl,
+    latitudeField: 'LATITUDE',
+    longitudeField: 'LONGITUDE',
+    popupTemplate: arenaTemplate,
+    visible: false,
+    renderer: arenaRenderer,
+    // labelingInfo: [labelClass],
+  });
+  map.add(arenas);
+
+  arenas.when(() => {
+    arenas.queryFeatures().then((results) => {
+      results.features.forEach((f) => {
+        addArenaClass(f.attributes['team'], arenaRenderer);
+      });
+      //buildTeamList(results.features);
     });
   });
 
