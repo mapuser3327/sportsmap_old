@@ -7,6 +7,7 @@ require([
   'esri/renderers/SimpleRenderer',
   'esri/widgets/Legend',
   'esri/widgets/BasemapGallery',
+  'esri/Basemap',
   'esri/widgets/Home',
   'esri/widgets/Expand',
   'esri/layers/GeoJSONLayer',
@@ -24,6 +25,7 @@ require([
   SimpleRenderer,
   Legend,
   BasemapGallery,
+  Basemap,
   Home,
   Expand,
   GeoJSONLayer,
@@ -38,7 +40,12 @@ require([
   let eaglesPlayers;
   const server = location.origin + '/';
   const map = new Map({
-    basemap: 'streets-vector',
+    // basemap: 'streets-vector',
+    basemap: new Basemap({
+      portalItem: {
+        id: '3e23478909194c54992eaaee78b5f754', // enhanced contrast dark map
+      },
+    }),
   });
 
   const positions = new Set();
