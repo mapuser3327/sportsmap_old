@@ -112,6 +112,16 @@ require([
     // listNode.appendChild(fragment);
   };
 
+  function buildTeamTitle(feature) {
+    const url =
+      `${server}/teamIcons/` +
+      feature.graphic.attributes['team_short_name'] +
+      '.png';
+    console.log(url);
+    let result = `<img width="35" height="35" src="${url}" alt="{TEAM}">{TEAM}`;
+    return result;
+  }
+
   function buildTitle(feature) {
     //console.log(feature.graphic.attributes);
 
@@ -141,7 +151,7 @@ require([
     outFields: ['*'],
   });
   const stadiumTemplate = new PopupTemplate({
-    title: '{ TEAM }',
+    title: buildTeamTitle,
     outFields: ['*'],
 
     content: [
