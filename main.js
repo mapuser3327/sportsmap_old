@@ -123,7 +123,7 @@ require([
     const url =
       `${server}/teamIcons/` +
       feature.graphic.attributes['team_short_name'] +
-      '.png';
+      '.webp';
     console.log(url);
     let result = `<img width="35" height="35" src="${url}" alt="{TEAM}">{TEAM}`;
     return result;
@@ -233,7 +233,7 @@ require([
   });
 
   const addClass = function (val, renderer) {
-    const url = 'teamIcons/' + val + '.png';
+    const url = 'teamIcons/' + val + '.webp';
     const sym = new PictureMarkerSymbol({
       url: url,
       width: '35px',
